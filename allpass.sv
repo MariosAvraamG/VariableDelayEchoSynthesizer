@@ -4,8 +4,8 @@ module processor (
 	input  logic [9:0]	data_in,		// 10-bit input data
 	input  logic		data_valid,		// asserted when sample data is ready for processing
 	output logic [9:0] 	data_out,		// 10-bit output data
-	input logic [9:0] SW,
-	output logic [6:0] HEX0, HEX1, HEX2, HEX3
+	input logic [9:0] sw,
+	output logic [6:0] hex0, hex1, hex2, hex3
 );
 
 	logic [9:0] x, y;
@@ -27,25 +27,24 @@ module processor (
 		.clk(sysclk),
 		.rst(1'b0),
 		.en(~data_valid),
-		.out(rdaddr)
+		.count(rdaddr)
 	);
 	
 	
 	always_ff @(posedge sysclk) begin
-		wraddr <= rdaddr + {SW, 3'b000};
-		y <= x - {1'b0, ram_out}/2;
+		wraddr <= rdaddr + {sw, 3'b000};
+		y <= x - (ram_out >>> 1);
 		data_out <= y+DAC_OFFSET;
 	end
-		
-	assign read_out = SW*819;
 	
+	assign read_out = sw*819;
 	logic [3:0] BCD0, BCD1, BCD2, BCD3;
 	
 	bin2bcd_16(.x({6'b000000, read_out[19:10]}), .BCD0(BCD0), .BCD1(BCD1), .BCD2(BCD2), .BCD3(BCD3));
-	hexto7seg SEG0(.out(HEX0), .in(BCD0));
-	hexto7seg SEG1(.out(HEX1), .in(BCD1));
-	hexto7seg SEG2(.out(HEX2), .in(BCD2));
-	hexto7seg SEG3(.out(HEX3), .in(BCD3));
+	hexto7seg SEG0(.out(hex0), .in(BCD0));
+	hexto7seg SEG1(.out(hex1), .in(BCD1));
+	hexto7seg SEG2(.out(hex2), .in(BCD2));
+	hexto7seg SEG3(.out(hex3), .in(BCD3));
 	
 	
 	
