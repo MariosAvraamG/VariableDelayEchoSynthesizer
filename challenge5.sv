@@ -5,7 +5,8 @@ module challenge5(
 	output logic            DAC_CS, DAC_SDI, DAC_SCK,	// DAC SPI signals
 	output logic            ADC_CS, ADC_CLK,			// ADC chip-select & serial symmetical clock at 1MHz
 	input logic [9:0] SW,
-	output logic [6:0] HEX0, HEX1, HEX2, HEX3
+	output logic [6:0] HEX0, HEX1, HEX2,
+	output logic [7:0] HEX3
 );
 	// internal signals
 	logic       tick_10k;			//  1 tick per sampling period
@@ -30,7 +31,7 @@ module challenge5(
 		   .dac_cs(DAC_CS), .dac_sdi(DAC_SDI), .dac_sck(DAC_SCK) );
 			
 	processor	ALLPASS (.sysclk(MAX10_CLK1_50), 
-						.data_in(data_in), .data_out(data_out), .data_valid(data_valid), .sw(SW), .hex0(HEX0), .hex1(HEX1), .hex2(HEX2), .hex3(HEX3));   // do some processing on the data
+						.data_in(data_in), .data_out(data_out), .data_valid(data_valid), .sw(SW), .hex0(HEX0), .hex1(HEX1), .hex2(HEX2), .hex3(HEX3[6:0]));   // do some processing on the data
 	
 endmodule
 

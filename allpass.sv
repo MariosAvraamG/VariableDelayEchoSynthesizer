@@ -7,12 +7,11 @@ module processor (
 	input logic [9:0] sw,
 	output logic [6:0] hex0, hex1, hex2, hex3
 );
-
-	logic [9:0] x, y;
-	logic [8:0] ram_out;
+	logic signed [9:0] x, y, ram_out_ext;
+	logic signed [8:0] ram_out;
 	logic [12:0] rdaddr, wraddr;
 	logic [19:0] read_out;
-	logic	enable;
+	logic	enable, delayed_data_valid;
 
 	parameter 		ADC_OFFSET = 10'd512;
 	parameter 		DAC_OFFSET = 10'd512;
@@ -26,15 +25,16 @@ module processor (
 	counter#(.WIDTH(13)) CTR(
 		.clk(sysclk),
 		.rst(1'b0),
-		.en(~data_valid),
+		.en(delayed_data_valid & ~data_valid),
 		.count(rdaddr)
 	);
 	
-	
+	assign wraddr = rdaddr + {sw, 3'b000};
 	always_ff @(posedge sysclk) begin
-		wraddr <= rdaddr + {sw, 3'b000};
-		y <= x - (ram_out >>> 1);
-		data_out <= y+DAC_OFFSET;
+		delayed_data_valid <= data_valid;
+		ram_out_ext <= {ram_out[8], ram_out};
+		y <= x - (ram_out_ext >>> 1);
+		data_out <= DAC_OFFSET + y;
 	end
 	
 	assign read_out = sw*819;
